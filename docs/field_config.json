@@ -1,0 +1,71 @@
+{
+  "field": {
+    "length_x": 26.0,
+    "width_z": 26.0,
+    "x_min": -13.0,
+    "x_max": 13.0,
+    "z_min": -13.0,
+    "z_max": 13.0
+  },
+
+  "crop_rows": {
+    "count": 4,
+    "length": 16.0,
+    "height": 0.8,
+    "width": 0.4,
+    "x_min": -8.0,
+    "x_max": 8.0,
+    "center_spacing": 1.8,
+
+    "rows": [
+      {
+        "id": "Crop_Row1",
+        "x": 0.0,
+        "z": -2.7
+      },
+      {
+        "id": "Crop_Row2",
+        "x": 0.0,
+        "z": -0.9
+      },
+      {
+        "id": "Crop_Row3",
+        "x": 0.0,
+        "z": 0.9
+      },
+      {
+        "id": "Crop_Row4",
+        "x": 0.0,
+        "z": 2.7
+      }
+    ]
+  },
+
+  "headlands": {
+    "left": {
+      "x_min": -13.0,
+      "x_max": -8.0,
+      "width": 5.0
+    },
+    "right": {
+      "x_min": 8.0,
+      "x_max": 13.0,
+      "width": 5.0
+    }
+  },
+
+  "obstacles": [
+    {
+      "id": "Obstacle_1",
+      "x": 2.0,
+      "z": 0.0
+    }
+  ],
+
+  "robot_start": {
+    "x": -7.0,
+    "z": 0.0,
+    "heading": "positive_x",
+    "status": "recommended_start_pose"
+  }
+}
