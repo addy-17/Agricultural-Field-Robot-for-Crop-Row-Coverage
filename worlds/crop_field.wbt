@@ -1,35 +1,20 @@
-#VRML_SIM R2023b utf8
-
-PROFILE proto
+#VRML_SIM R2025a utf8
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/adept/pioneer/protos/Pioneer3at.proto"
 
 WorldInfo {
-  info [
-    "Agricultural Field Robot Simulation for Crop-Row Coverage"
-    "CSAI4014 AISR Project - Pioneer 3-AT Autonomous In-Row Guidance & Headland Maneuver"
-  ]
-  title "Agricultural Field Robot - Crop-Row Coverage"
-  basicTimeStep 32
-  coordinateSystem "NUE"
 }
-
 Viewpoint {
-  orientation -0.57735 0.57735 0.57735 2.0944
-  position 0 15 15
+  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
+  position 7.552742359740109e-05 15.00007552763717 41.71049866257942
 }
-
 TexturedBackground {
   texture "noon_cloudy_countryside"
 }
-
 TexturedBackgroundLight {
   luminosity 1.2
 }
-
-# Ground: Outdoor Soil / Grass Terrain (25m x 25m)
 Solid {
   translation 0 -0.05 0
   children [
@@ -37,25 +22,18 @@ Solid {
       appearance PBRAppearance {
         baseColor 0.42 0.31 0.18
         roughness 0.9
-        metalness 0.0
+        metalness 0
       }
       geometry Box {
         size 26 0.1 26
       }
     }
   ]
+  name "Field_Ground"
   boundingObject Box {
     size 26 0.1 26
   }
 }
-
-# =========================================================================
-# AGRICULTURAL CROP ROWS (Spacing = 1.8m, Length = 16m, Height = 0.8m)
-# Row 1 (y = -2.7m), Row 2 (y = -0.9m), Row 3 (y = +0.9m), Row 4 (y = +2.7m)
-# Navigation Lanes: Lane A (-1.8m), Lane B (0.0m), Lane C (+1.8m)
-# =========================================================================
-
-# Row 1: Boundary Crop Line at y = -2.7
 Solid {
   translation 0 0.4 -2.7
   children [
@@ -69,12 +47,11 @@ Solid {
       }
     }
   ]
+  name "Crop_Row1"
   boundingObject Box {
     size 16 0.8 0.4
   }
 }
-
-# Row 2: Crop Line at y = -0.9
 Solid {
   translation 0 0.4 -0.9
   children [
@@ -88,12 +65,11 @@ Solid {
       }
     }
   ]
+  name "Crop_Row2"
   boundingObject Box {
     size 16 0.8 0.4
   }
 }
-
-# Row 3: Crop Line at y = +0.9
 Solid {
   translation 0 0.4 0.9
   children [
@@ -107,12 +83,11 @@ Solid {
       }
     }
   ]
+  name "Crop_Row3"
   boundingObject Box {
     size 16 0.8 0.4
   }
 }
-
-# Row 4: Boundary Crop Line at y = +2.7
 Solid {
   translation 0 0.4 2.7
   children [
@@ -126,14 +101,13 @@ Solid {
       }
     }
   ]
+  name "Crop_Row4"
   boundingObject Box {
     size 16 0.8 0.4
   }
 }
-
-# Sample Field In-Row Obstacle (Rock / Broken Debris at x=2.0 in Lane B)
 Solid {
-  translation 2.0 0.1 0.0
+  translation 2 0.1 0
   children [
     Shape {
       appearance PBRAppearance {
@@ -146,102 +120,9 @@ Solid {
       }
     }
   ]
+  name "Obstacle_1"
   boundingObject Cylinder {
     height 0.2
     radius 0.15
   }
 }
-
-# =========================================================================
-# PIONEER 3-AT ROBOT WITH CALIBRATED SENSORS & ACTUATORS
-# =========================================================================
-Pioneer3at {
-  translation -7.0 0.11 0.0
-  rotation 0 1 0 0
-  controller "agricultural_robot"
-  extensionSlot [
-    # Global Positioning System
-    GPS {
-      translation 0 0.25 0
-      name "gps"
-    }
-    # 3-Axis Inertial Measurement Unit
-    InertialUnit {
-      name "inertial_unit"
-    }
-    # Redundant Geomagnetic Compass
-    Compass {
-      name "compass"
-    }
-    # Front RGB Camera
-    Camera {
-      translation 0.25 0.28 0
-      rotation 0 1 0 0
-      name "camera"
-      fieldOfView 1.0
-      width 320
-      height 240
-    }
-    # Left-Front Distance Sensor (Points Lateral Left at +90 deg)
-    DistanceSensor {
-      translation 0.20 0.18 0.22
-      rotation 0 1 0 1.5708
-      name "ds_left_front"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-    # Left-Rear Distance Sensor (Points Lateral Left at +90 deg)
-    DistanceSensor {
-      translation -0.20 0.18 0.22
-      rotation 0 1 0 1.5708
-      name "ds_left_rear"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-    # Right-Front Distance Sensor (Points Lateral Right at -90 deg)
-    DistanceSensor {
-      translation 0.20 0.18 -0.22
-      rotation 0 1 0 -1.5708
-      name "ds_right_front"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-    # Right-Rear Distance Sensor (Points Lateral Right at -90 deg)
-    DistanceSensor {
-      translation -0.20 0.18 -0.22
-      rotation 0 1 0 -1.5708
-      name "ds_right_rear"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-    # Front-Left Safety Distance Sensor (Points Forward-Left at +15 deg)
-    DistanceSensor {
-      translation 0.25 0.18 0.10
-      rotation 0 1 0 0.26
-      name "ds_front_left"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-    # Front-Right Safety Distance Sensor (Points Forward-Right at -15 deg)
-    DistanceSensor {
-      translation 0.25 0.18 -0.10
-      rotation 0 1 0 -0.26
-      name "ds_front_right"
-      lookupTable [
-        0 0 0
-        2 1024 0
-      ]
-    }
-  ]
-}
-
