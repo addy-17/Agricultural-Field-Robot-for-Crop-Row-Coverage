@@ -40,6 +40,53 @@ This project develops an autonomous agricultural field robot capable of complete
 
 ## 🛠️ Modules & Deliverables
 
+## Member 1: Webots Environment & Field Design
+
+Member 1 is responsible for designing and organizing the agricultural field environment used by the autonomous crop-row coverage robot.
+
+### Responsibilities
+
+- Designed and organized the Webots agricultural field environment.
+- Defined a 26 m × 26 m field with clear field boundaries.
+- Organized four parallel crop rows and assigned unique row IDs (`Crop_Row1` to `Crop_Row4`).
+- Defined crop-row centerlines and maintained 1.8 m center-to-center row spacing.
+- Defined 5 m headland regions at both ends of the crop rows for row-end turning.
+- Identified and documented static obstacle locations for obstacle-avoidance testing.
+- Defined the recommended robot start reference for integration with the Pioneer 3-AT robot.
+- Prepared field dimensions and reference coordinates for the navigation and coverage-planning modules.
+- Created a machine-readable field configuration to support integration with other project modules.
+
+### Deliverables
+
+- `worlds/crop_field.wbt` — agricultural field environment and field objects
+- `docs/field_coordinates.md` — field dimensions, crop-row centerlines, headland boundaries, obstacle coordinates, and robot start reference
+- `docs/field_config.json` — machine-readable field configuration for navigation and coverage planning
+
+### Field Configuration Summary
+
+| Parameter | Value |
+|---|---|
+| Field Size | 26 m × 26 m |
+| Number of Crop Rows | 4 |
+| Crop Row Length | 16 m |
+| Crop Row Width | 0.4 m |
+| Row Center Spacing | 1.8 m |
+| Left Headland | X = -13 m to -8 m |
+| Right Headland | X = 8 m to 13 m |
+| Obstacle 1 | X = 2.0 m, Z = 0.0 m |
+| Recommended Robot Start | X = -7.0 m, Z = 0.0 m, heading +X |
+
+### Integration Handoff
+
+Member 1 provides the following environment information to the navigation and coverage-planning modules:
+
+- Crop-row IDs and centerlines
+- Row spacing
+- Field boundaries
+- Headland boundaries
+- Obstacle coordinates
+- Recommended robot start reference
+
 ### Member 2: Robot Model, Sensors & Motion Interface
 - **Robot & World:** [`worlds/crop_field.wbt`](worlds/crop_field.wbt) — Webots agricultural field with 4 parallel crop rows (spacing $1.8\text{ m}$, length $16\text{ m}$), soil ground terrain, and headland turn clearings.
 - **Motion Interface:** [`controllers/agricultural_robot/motion.py`](controllers/agricultural_robot/motion.py) — Wheel kinematics, velocity limits, and high-level motion helper methods (`move_forward`, `move_backward`, `turn_left`, `turn_right`, `stop`, `set_velocity`).
