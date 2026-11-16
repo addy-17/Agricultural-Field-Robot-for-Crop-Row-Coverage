@@ -2,12 +2,13 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/adept/pioneer3/protos/Pioneer3at.proto"
 
 WorldInfo {
 }
 Viewpoint {
   orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
-  position 7.552742359740109e-05 15.00007552763717 41.71049866257942
+  position 0.00012850641161830565 15.000128506775008 60.44667581884456
 }
 TexturedBackground {
   texture "noon_cloudy_countryside"
@@ -125,4 +126,16 @@ Solid {
     height 0.2
     radius 0.15
   }
+}
+Pioneer3at {
+  hidden position_0_0 -7.214845684593279e-13
+  hidden position_0_1 1.187008621748268e-05
+  hidden position_0_2 -7.221036140184992e-13
+  hidden position_0_3 -1.1552501427283311e-05
+  hidden rotation_1 0.5773516025735235 -0.5773476025762795 -0.5773516024098371 2.0944050001636825
+  hidden rotation_2 0.5773493180502715 -0.5773453180921876 -0.5773561713742369 2.09439814675063
+  hidden rotation_3 0.5773516022441387 -0.5773476022469003 -0.5773516030685987 2.0944049991755422
+  hidden rotation_4 0.5773538258427622 -0.577349825807402 -0.5773471558991936 2.094411669923043
+  translation -7.000466949843487 0.11507992315082029 -0.013324620974534435
+  rotation -0.9995920548323018 0.002462529625645973 0.02845452273329355 0.11344857244780093
 }
