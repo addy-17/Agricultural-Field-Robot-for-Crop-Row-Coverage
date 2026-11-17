@@ -45,9 +45,9 @@ class Pioneer3ATMotion:
     # Physical vehicle constants (Pioneer 3-AT specifications)
     WHEEL_RADIUS: float = 0.111        # meters (111 mm)
     TRACK_WIDTH: float = 0.400         # meters (effective distance between left & right wheels)
-    MAX_MOTOR_SPEED: float = 6.40      # rad/s (Pioneer 3-AT standard motor max velocity)
-    DEFAULT_LINEAR_SPEED: float = 0.50 # m/s nominal agricultural transit speed
-    DEFAULT_ANGULAR_SPEED: float = 0.8 # rad/s nominal turning rate
+    MAX_MOTOR_SPEED: float = 12.00     # rad/s (allows higher agile cruising speed up to ~1.3 m/s)
+    DEFAULT_LINEAR_SPEED: float = 0.85 # m/s agile transit speed
+    DEFAULT_ANGULAR_SPEED: float = 1.0 # rad/s nominal turning rate
 
     def __init__(self, robot: Optional[object] = None):
         """

@@ -73,9 +73,9 @@ class MasterAgriculturalRobot:
 
         # 4. Member 3: In-Row Guidance & Safety Bubble
         if self.use_method_b:
-            self.guidance = MethodBStanleyRowFollower(nominal_speed=0.50, min_speed=0.20)
+            self.guidance = MethodBStanleyRowFollower(nominal_speed=0.85, min_speed=0.40)
         else:
-            self.guidance = MethodAPIDRowFollower(nominal_speed=0.45)
+            self.guidance = MethodAPIDRowFollower(nominal_speed=0.80)
         self.safety = InRowObstacleSafety(stop_threshold=0.40, caution_threshold=0.80)
 
         # 5. Member 4: Headland Maneuver Generator
@@ -136,12 +136,12 @@ class MasterAgriculturalRobot:
             # -----------------------------------------------------------------
             # STEP 3: Execution Control by State
             # -----------------------------------------------------------------
-            v_cmd = 0.45
+            v_cmd = 0.85
             omega_cmd = 0.0
 
             if state == MissionState.INITIALIZE or self.step_count < 30:
-                # Startup phase: drive straight forward down the row
-                v_cmd = 0.45
+                # Startup phase: drive straight forward down the row at agile cruising speed
+                v_cmd = 0.85
                 omega_cmd = 0.0
 
             elif state == MissionState.IN_ROW_TRACKING:
