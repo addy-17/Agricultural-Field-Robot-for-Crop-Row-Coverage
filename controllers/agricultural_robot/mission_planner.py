@@ -39,8 +39,11 @@ class CoverageMissionPlanner:
         # Default field configuration matching Member 1 coordinates
         self.field_length_x = 16.0
         self.row_spacing_z = 1.80
-        self.headland_x_pos = 7.50   # Positive headland boundary (meters)
-        self.headland_x_neg = -7.50  # Negative headland boundary (meters)
+        # Trigger headland transition BEFORE the physical row end (rows run -8 to +8).
+        # Robot exits rows at x=±8; we begin the exit drive at x=±7.5 and need 2 s
+        # to clear into open headland before the turn starts.
+        self.headland_x_pos = 7.50   # Positive headland approach trigger (meters)
+        self.headland_x_neg = -7.50  # Negative headland approach trigger (meters)
 
         # Pre-planned coverage sequence of navigation lanes:
         # Lane 2 (z=0.0, heading +X) -> Lane 3 (z=+1.8, heading -X) -> Lane 1 (z=-1.8, heading +X)
@@ -53,6 +56,13 @@ class CoverageMissionPlanner:
         self.current_lane_idx: int = 0
         self.state: MissionState = MissionState.INITIALIZE
         self.previous_state: MissionState = MissionState.INITIALIZE
+
+        # Headland exit drive: keep state = HEADLAND_TRANSITION for this many FSM steps
+        # so the robot drives ~2 m into open headland BEFORE starting the turn.
+        # At v=0.35 m/s and 32 ms time-step: 60 steps ≈ 1.92 s ≈ 0.67 m clearance.
+        # We use 75 steps (2.4 s) so the robot is well clear of the row walls.
+        self.headland_exit_ticks_required: int = 75
+        self.headland_exit_ticks: int = 0
 
         # Telemetry & Coverage Metrics
         self.distance_traversed: float = 0.0
@@ -169,11 +179,16 @@ class CoverageMissionPlanner:
                 self.state = MissionState.HEADLAND_TRANSITION
 
         elif self.state == MissionState.HEADLAND_TRANSITION:
-            # Transition to headland turning
+            # Stay in HEADLAND_TRANSITION for headland_exit_ticks_required steps so the
+            # robot drives forward into the open headland before the turn starts.
+            # This makes the rotation clearly visible in the open field area.
+            self.headland_exit_ticks += 1
             if self.current_lane_idx >= len(self.lanes) - 1:
-                # All lanes finished!
+                # All lanes finished
                 self.state = MissionState.MISSION_COMPLETE
-            else:
+            elif self.headland_exit_ticks >= self.headland_exit_ticks_required:
+                # Exit drive complete: now trigger the rotation
+                self.headland_exit_ticks = 0
                 self.state = MissionState.HEADLAND_TURN
 
         elif self.state == MissionState.HEADLAND_TURN:

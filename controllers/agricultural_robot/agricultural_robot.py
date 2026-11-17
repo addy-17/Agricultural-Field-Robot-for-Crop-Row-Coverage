@@ -81,12 +81,14 @@ class MasterAgriculturalRobot:
         # 5. Member 4: Headland Maneuver Generator
         turn_strat = TurnStrategy.OMEGA_TURN_B if self.use_method_b else TurnStrategy.POINT_TURN_A
         self.turn_generator = HeadlandTurnGenerator(strategy=turn_strat)
+        self._turn_initialized: bool = False   # guard: start_turn() fires only once per headland
 
         # 6. Member 5: Real-Time Telemetry Logger
         self.logger = TelemetryMetricsLogger(method_name=self.method_tag)
 
         self.sim_time = 0.0
         self.step_count = 0
+        self._turn_initialized: bool = False   # guard: start_turn() fires only once per headland
 
     def run(self):
         """Main synchronous simulation loop."""
@@ -155,18 +157,26 @@ class MasterAgriculturalRobot:
                 v_cmd, omega_cmd, _ = self.safety.filter_velocity(v_des, omega_des, front_dist)
 
             elif state == MissionState.HEADLAND_TRANSITION:
-                # Member 4: Trigger Turnaround Maneuver
-                turn_dir = self.mission_planner.get_target_turn_direction()
-                self.turn_generator.start_turn(
-                    turn_direction=turn_dir,
-                    current_yaw=yaw,
-                    row_spacing=self.mission_planner.row_spacing_z
-                )
-                v_cmd = 0.15
+                # Robot is driving OUT of the row into open headland.
+                # The FSM holds this state for ~75 steps (2.4 s) before allowing the turn.
+                # Drive at moderate forward speed — clearly shows exit from rows.
+                v_cmd = 0.35
                 omega_cmd = 0.0
+                self._turn_initialized = False   # reset turn guard for next headland
 
             elif state == MissionState.HEADLAND_TURN:
-                # Member 4: Headland Turn Execution
+                # First entry: initialise the rotation manoeuvre
+                if not self._turn_initialized:
+                    turn_dir = self.mission_planner.get_target_turn_direction()
+                    self.turn_generator.start_turn(
+                        turn_direction=turn_dir,
+                        current_yaw=yaw,
+                        row_spacing=self.mission_planner.row_spacing_z
+                    )
+                    self._turn_initialized = True
+                    print(f"[HEADLAND_TURN] Starting {turn_dir} turn at "
+                          f"pos=({x:.2f}, {y:.2f}), yaw={math.degrees(yaw):.1f}°")
+                # Execute turn step
                 v_cmd, omega_cmd, finished = self.turn_generator.step(dt=self.dt, current_yaw=yaw)
 
             elif state == MissionState.OBSTACLE_AVOIDANCE:
@@ -215,7 +225,7 @@ class MasterAgriculturalRobot:
             # Periodic status report in Webots console
             if self.step_count % 30 == 0:
                 print(f"[{state.value[:10]}] t={self.sim_time:05.1f}s | "
-                      f"Pos=({x:.2f}, {z:.2f}) | e_y={e_y:+.3f}m | "
+                      f"Pos=({x:.2f}, {y:.2f}) | e_y={e_y:+.3f}m | "
                       f"v={v_cmd:.2f}m/s | w={omega_cmd:+.3f}rad/s | Cov={coverage_pct:.1f}%")
 
         # Mission Finished Summary
