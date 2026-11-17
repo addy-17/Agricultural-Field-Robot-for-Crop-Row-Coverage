@@ -14,8 +14,9 @@ WorldInfo {
 }
 
 Viewpoint {
-  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
-  position 7.552742359740109e-05 15.00007552763717 41.71049866257942
+  orientation -0.22 0.88 -0.42 1.95
+  position -12 5 3.5
+  follow "Pioneer_3_AT"
 }
 
 TexturedBackground {
