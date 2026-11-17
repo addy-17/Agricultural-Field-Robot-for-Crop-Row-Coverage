@@ -102,31 +102,31 @@ class ObstacleBypassManeuver:
 
         self.elapsed += dt
 
-        # Phase 1: Turn outward away from obstacle (~24 deg)
+        # Phase 1: Sharp outward turn away from obstacle (~43 deg rotating angle)
         if self.phase == 1:
-            v = 0.20
-            omega = self.direction * 0.40
-            if self.elapsed >= 1.00:  # ~24 deg rotation
+            v = 0.12
+            omega = self.direction * 0.52
+            if self.elapsed >= 1.45:  # ~43 deg rotation
                 self.phase = 2
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 2: Shifting laterally into safe clearance corridor...")
             return v, omega, False
 
-        # Phase 2: Drive diagonally forward to build ~0.30m lateral offset
+        # Phase 2: Drive diagonally forward to build ~0.48m lateral offset
         elif self.phase == 2:
-            v = 0.32
+            v = 0.30
             omega = 0.0
-            if self.elapsed >= 1.30:
+            if self.elapsed >= 1.40:
                 self.phase = 3
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 3: Aligning parallel to crop line...")
             return v, omega, False
 
-        # Phase 3: Straighten heading parallel to row
+        # Phase 3: Straighten heading parallel to row (~43 deg counter-rotation)
         elif self.phase == 3:
-            v = 0.20
-            omega = -self.direction * 0.40
-            if self.elapsed >= 1.00:
+            v = 0.12
+            omega = -self.direction * 0.52
+            if self.elapsed >= 1.45:
                 self.phase = 4
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 4: Passing obstacle alongside...")

@@ -38,7 +38,7 @@ class CoverageMissionPlanner:
     def __init__(self, config_path: Optional[str] = None):
         # Default field configuration matching Member 1 coordinates
         self.field_length_x = 16.0
-        self.row_spacing_z = 1.80
+        self.row_spacing_z = 2.20
         # Trigger headland transition BEFORE the physical row end (rows run -8 to +8).
         # Robot exits rows at x=±8; we begin the exit drive at x=±7.5 and need 2 s
         # to clear into open headland before the turn starts.
@@ -46,11 +46,11 @@ class CoverageMissionPlanner:
         self.headland_x_neg = -7.50  # Negative headland approach trigger (meters)
 
         # Pre-planned coverage sequence of navigation lanes:
-        # Lane 2 (z=0.0, heading +X) -> Lane 3 (z=+1.8, heading -X) -> Lane 1 (z=-1.8, heading +X)
+        # Lane 2 (z=0.0, heading +X) -> Lane 3 (z=+2.2, heading -X) -> Lane 1 (z=-2.2, heading +X)
         self.lanes: List[Dict[str, any]] = [
             {"id": "Lane_2", "z_center": 0.00, "direction": +1, "start_x": -7.0, "end_x": +7.5},
-            {"id": "Lane_3", "z_center": 1.80, "direction": -1, "start_x": +7.5, "end_x": -7.5},
-            {"id": "Lane_1", "z_center": -1.80, "direction": +1, "start_x": -7.5, "end_x": +7.5},
+            {"id": "Lane_3", "z_center": 2.20, "direction": -1, "start_x": +7.5, "end_x": -7.5},
+            {"id": "Lane_1", "z_center": -2.20, "direction": +1, "start_x": -7.5, "end_x": +7.5},
         ]
 
         self.current_lane_idx: int = 0

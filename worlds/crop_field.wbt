@@ -51,15 +51,15 @@ Solid {
 }
 
 # =========================================================================
-# AGRICULTURAL CROP ROWS (Spacing = 1.8m, Length = 16m, Height = 0.8m)
+# AGRICULTURAL CROP ROWS (Spacing = 2.2m, Length = 16m, Height = 0.8m)
 # Rows along X, Spaced across Y:
-# Row 1 (y = -2.7m), Row 2 (y = -0.9m), Row 3 (y = +0.9m), Row 4 (y = +2.7m)
-# Navigation Lanes: Lane 1 (-1.8m), Lane 2 (0.0m), Lane 3 (+1.8m)
+# Row 1 (y = -3.3m), Row 2 (y = -1.1m), Row 3 (y = +1.1m), Row 4 (y = +3.3m)
+# Navigation Lanes: Lane 1 (-2.2m), Lane 2 (0.0m), Lane 3 (+2.2m)
 # =========================================================================
 
-# Row 1: Boundary Crop Line at y = -2.7m
+# Row 1: Boundary Crop Line at y = -3.3m
 Solid {
-  translation 0 -2.7 0.4
+  translation 0 -3.3 0.4
   children [
     Shape {
       appearance PBRAppearance {
@@ -77,9 +77,9 @@ Solid {
   }
 }
 
-# Row 2: Crop Line at y = -0.9m
+# Row 2: Crop Line at y = -1.1m
 Solid {
-  translation 0 -0.9 0.4
+  translation 0 -1.1 0.4
   children [
     Shape {
       appearance PBRAppearance {
@@ -97,9 +97,9 @@ Solid {
   }
 }
 
-# Row 3: Crop Line at y = +0.9m
+# Row 3: Crop Line at y = +1.1m
 Solid {
-  translation 0 0.9 0.4
+  translation 0 1.1 0.4
   children [
     Shape {
       appearance PBRAppearance {
@@ -117,9 +117,9 @@ Solid {
   }
 }
 
-# Row 4: Boundary Crop Line at y = +2.7m
+# Row 4: Boundary Crop Line at y = +3.3m
 Solid {
-  translation 0 2.7 0.4
+  translation 0 3.3 0.4
   children [
     Shape {
       appearance PBRAppearance {

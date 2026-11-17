@@ -130,7 +130,7 @@ class MasterAgriculturalRobot:
                 self.obstacle_cooldown -= 1
                 is_obstacle = False
             else:
-                is_obstacle = (front_dist <= 0.80) and (self.step_count > 60)
+                is_obstacle = (front_dist <= 1.05) and (self.step_count > 60)
 
             # If bypass is already actively steering around an obstacle, keep FSM in avoidance
             if self.bypass.is_active:
