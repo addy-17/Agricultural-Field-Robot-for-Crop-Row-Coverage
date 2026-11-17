@@ -102,31 +102,31 @@ class ObstacleBypassManeuver:
 
         self.elapsed += dt
 
-        # Phase 1: Sharp outward turn away from obstacle (~43 deg rotating angle)
+        # Phase 1: Wide outward turn away from obstacle (~55 deg rotating angle)
         if self.phase == 1:
-            v = 0.12
-            omega = self.direction * 0.52
-            if self.elapsed >= 1.45:  # ~43 deg rotation
+            v = 0.08
+            omega = self.direction * 0.58
+            if self.elapsed >= 1.65:  # ~55 deg rotation
                 self.phase = 2
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 2: Shifting laterally into safe clearance corridor...")
             return v, omega, False
 
-        # Phase 2: Drive diagonally forward to build ~0.48m lateral offset
+        # Phase 2: Drive diagonally forward to build ~0.55m lateral offset
         elif self.phase == 2:
             v = 0.30
             omega = 0.0
-            if self.elapsed >= 1.40:
+            if self.elapsed >= 1.50:
                 self.phase = 3
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 3: Aligning parallel to crop line...")
             return v, omega, False
 
-        # Phase 3: Straighten heading parallel to row (~43 deg counter-rotation)
+        # Phase 3: Straighten heading parallel to row (~55 deg counter-rotation)
         elif self.phase == 3:
-            v = 0.12
-            omega = -self.direction * 0.52
-            if self.elapsed >= 1.45:
+            v = 0.08
+            omega = -self.direction * 0.58
+            if self.elapsed >= 1.65:
                 self.phase = 4
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 4: Passing obstacle alongside...")
@@ -136,7 +136,7 @@ class ObstacleBypassManeuver:
         elif self.phase == 4:
             v = 0.35
             omega = 0.0
-            if self.elapsed >= 1.80:
+            if self.elapsed >= 2.00:
                 self.phase = 5
                 self.elapsed = 0.0
                 print("[ObstacleBypass] Phase 5: Re-entering row center...")
@@ -146,7 +146,7 @@ class ObstacleBypassManeuver:
         elif self.phase == 5:
             v = 0.25
             omega = -self.direction * 0.25
-            if self.elapsed >= 1.00:
+            if self.elapsed >= 1.20:
                 self.is_active = False
                 print("[ObstacleBypass] Detour complete! Stanley in-row follower resuming centerline tracking.")
                 return 0.35, 0.0, True
