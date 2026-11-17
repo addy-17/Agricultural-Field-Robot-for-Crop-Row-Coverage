@@ -31,7 +31,7 @@ from mission_planner import CoverageMissionPlanner, MissionState
 from motion import Pioneer3ATMotion
 from sensors import Pioneer3ATSensors
 from row_follower import MethodAPIDRowFollower, MethodBStanleyRowFollower
-from obstacle_avoidance import InRowObstacleSafety
+from obstacle_avoidance import InRowObstacleSafety, ObstacleBypassManeuver
 from headland_turn import HeadlandTurnGenerator, TurnStrategy
 from metrics_logger import TelemetryMetricsLogger
 
@@ -71,12 +71,14 @@ class MasterAgriculturalRobot:
         self.motion = Pioneer3ATMotion(robot=self.robot)
         self.sensors = Pioneer3ATSensors(robot=self.robot, time_step=self.time_step)
 
-        # 4. Member 3: In-Row Guidance & Safety Bubble
+        # 4. Member 3: In-Row Guidance, Safety Bubble & Active Obstacle Bypass
         if self.use_method_b:
             self.guidance = MethodBStanleyRowFollower(nominal_speed=0.55, min_speed=0.28)
         else:
             self.guidance = MethodAPIDRowFollower(nominal_speed=0.52)
-        self.safety = InRowObstacleSafety(stop_threshold=0.40, caution_threshold=0.80)
+        self.safety = InRowObstacleSafety(stop_threshold=0.40, caution_threshold=1.00)
+        self.bypass = ObstacleBypassManeuver()
+        self.obstacle_cooldown = 0
 
         # 5. Member 4: Headland Maneuver Generator
         turn_strat = TurnStrategy.OMEGA_TURN_B if self.use_method_b else TurnStrategy.POINT_TURN_A
@@ -88,7 +90,6 @@ class MasterAgriculturalRobot:
 
         self.sim_time = 0.0
         self.step_count = 0
-        self._turn_initialized: bool = False   # guard: start_turn() fires only once per headland
 
     def run(self):
         """Main synchronous simulation loop."""
@@ -124,8 +125,16 @@ class MasterAgriculturalRobot:
             # STEP 2: Mission Planning & State Supervision (Member 1)
             # -----------------------------------------------------------------
             turn_completed = not self.turn_generator.is_running
-            # Only trigger obstacle braking if inside obstacle zone after initial startup
-            is_obstacle = (front_dist <= 0.40) and (self.step_count > 60)
+            # Obstacle detection with active cooldown to avoid re-triggering while passing
+            if self.obstacle_cooldown > 0:
+                self.obstacle_cooldown -= 1
+                is_obstacle = False
+            else:
+                is_obstacle = (front_dist <= 0.40) and (self.step_count > 60)
+
+            # If bypass is already actively steering around an obstacle, keep FSM in avoidance
+            if self.bypass.is_active:
+                is_obstacle = True
 
             # ENU world: GPS returns (x=East, y=North/lateral, z=Up/height).
             # Mission planner's 'z' parameter is the LATERAL lane coordinate (y in ENU),
@@ -150,7 +159,7 @@ class MasterAgriculturalRobot:
                 v_cmd = 0.55
                 omega_cmd = 0.0
 
-            elif state == MissionState.IN_ROW_TRACKING:
+            elif state in (MissionState.IN_ROW_TRACKING, MissionState.ROW_ENTRY):
                 # Member 3: In-Row Centering Guidance
                 v_des, omega_des = self.guidance.compute(lateral_error=e_y, heading_error=e_psi, dt=self.dt)
                 # Member 3: Reactive Obstacle Safety Filter
@@ -180,11 +189,20 @@ class MasterAgriculturalRobot:
                 v_cmd, omega_cmd, finished = self.turn_generator.step(dt=self.dt, current_yaw=yaw)
 
             elif state == MissionState.OBSTACLE_AVOIDANCE:
-                # Safety Active Stop
-                v_cmd = 0.0
-                omega_cmd = 0.0
-                if self.step_count % 30 == 0:
-                    print(f"[OBSTACLE] Step {self.step_count}: Front distance {front_dist:.2f}m <= 0.40m. Stopped.")
+                # Active Obstacle Bypass Maneuver (Member 3)
+                if not self.bypass.is_active:
+                    d_left = self.sensors.latest_distances.get("avg_left", 0.90)
+                    d_right = self.sensors.latest_distances.get("avg_right", 0.90)
+                    # Detour toward the side with more clearance (or default Left)
+                    swerve_left = (d_left >= d_right) or (d_left >= 0.70)
+                    self.bypass.start(swerve_left=swerve_left)
+
+                v_cmd, omega_cmd, bypass_done = self.bypass.step(dt=self.dt)
+                if bypass_done:
+                    # Detour finished! Resume in-row tracking with a cooldown buffer
+                    self.obstacle_cooldown = 120  # ~4 seconds buffer to pass obstacle completely
+                    self.bypass.reset()
+                    self.mission_planner.state = MissionState.IN_ROW_TRACKING
 
             elif state == MissionState.MISSION_COMPLETE:
                 v_cmd = 0.0
