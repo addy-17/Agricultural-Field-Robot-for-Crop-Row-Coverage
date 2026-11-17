@@ -5,7 +5,7 @@
 **Robot Platform:** Pioneer 3-AT (4-Wheel Skid-Steer Mobile Robot)  
 **Language:** Python 3  
 
----
+--- 
 
 ## 🌾 Project Overview
 This project presents a fully autonomous agricultural field robot engineered for complete crop-row coverage in precision agriculture. Navigating narrow parallel crop rows without relying on external RTK-GPS, the Pioneer 3-AT mobile robot executes:
