@@ -76,7 +76,7 @@ class MasterAgriculturalRobot:
             self.guidance = MethodBStanleyRowFollower(nominal_speed=0.55, min_speed=0.28)
         else:
             self.guidance = MethodAPIDRowFollower(nominal_speed=0.52)
-        self.safety = InRowObstacleSafety(stop_threshold=0.40, caution_threshold=1.00)
+        self.safety = InRowObstacleSafety(stop_threshold=0.80, caution_threshold=1.50)
         self.bypass = ObstacleBypassManeuver()
         self.obstacle_cooldown = 0
 
@@ -130,7 +130,7 @@ class MasterAgriculturalRobot:
                 self.obstacle_cooldown -= 1
                 is_obstacle = False
             else:
-                is_obstacle = (front_dist <= 0.40) and (self.step_count > 60)
+                is_obstacle = (front_dist <= 0.80) and (self.step_count > 60)
 
             # If bypass is already actively steering around an obstacle, keep FSM in avoidance
             if self.bypass.is_active:

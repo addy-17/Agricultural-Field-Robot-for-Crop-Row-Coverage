@@ -137,25 +137,25 @@ Solid {
   }
 }
 
-# Sample Field In-Row Obstacle (Rock / Broken Debris at x=2.0 in Lane 2)
+# Sample Field In-Row Obstacle (Small Field Stone at x=2.0 in Lane 2)
 Solid {
-  translation 2 0 0.1
+  translation 2 0 0.15
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.6 0.6 0.6
+        baseColor 0.65 0.55 0.40
         roughness 0.9
       }
       geometry Cylinder {
-        height 0.2
-        radius 0.15
+        height 0.30
+        radius 0.10
       }
     }
   ]
   name "Obstacle_1"
   boundingObject Cylinder {
-    height 0.2
-    radius 0.15
+    height 0.30
+    radius 0.10
   }
 }
 
@@ -230,20 +230,30 @@ Pioneer3at {
         2 0 0
       ]
     }
-    # Front-Left Safety Distance Sensor (Points Forward-Left at +15 deg)
+    # Front-Center Primary Proximity Sensor (Points Straight Forward at 0 deg)
     DistanceSensor {
-      translation 0.28 0.10 0.15
-      rotation 0 0 1 0.26
+      translation 0.30 0.0 0.08
+      rotation 0 0 1 0
+      name "ds_front_center"
+      lookupTable [
+        0 1024 0
+        2 0 0
+      ]
+    }
+    # Front-Left Safety Distance Sensor (Points Forward-Left at +10 deg)
+    DistanceSensor {
+      translation 0.28 0.12 0.08
+      rotation 0 0 1 0.17
       name "ds_front_left"
       lookupTable [
         0 1024 0
         2 0 0
       ]
     }
-    # Front-Right Safety Distance Sensor (Points Forward-Right at -15 deg)
+    # Front-Right Safety Distance Sensor (Points Forward-Right at -10 deg)
     DistanceSensor {
-      translation 0.28 -0.10 0.15
-      rotation 0 0 1 -0.26
+      translation 0.28 -0.12 0.08
+      rotation 0 0 1 -0.17
       name "ds_front_right"
       lookupTable [
         0 1024 0

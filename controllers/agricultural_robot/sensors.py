@@ -93,6 +93,7 @@ class Pioneer3ATSensors:
             "right_rear": SensorMovingAverageFilter(window_size=5),
             "front_left": SensorMovingAverageFilter(window_size=3),
             "front_right": SensorMovingAverageFilter(window_size=3),
+            "front_center": SensorMovingAverageFilter(window_size=3),
         }
 
         # Cached latest calibrated readings
@@ -104,6 +105,7 @@ class Pioneer3ATSensors:
             "right_rear": 0.90,
             "front_left": 2.00,
             "front_right": 2.00,
+            "front_center": 2.00,
             "avg_left": 0.90,
             "avg_right": 0.90,
             "min_front": 2.00
@@ -153,6 +155,7 @@ class Pioneer3ATSensors:
             "right_rear": "ds_right_rear",
             "front_left": "ds_front_left",
             "front_right": "ds_front_right",
+            "front_center": "ds_front_center",
         }
 
         found_count = 0
@@ -249,7 +252,7 @@ class Pioneer3ATSensors:
                 self.latest_pose["yaw_deg"] = math.degrees(yaw) % 360.0
 
         # 2. Update and Filter Distance Sensors
-        for key in ["left_front", "left_rear", "right_front", "right_rear", "front_left", "front_right"]:
+        for key in ["left_front", "left_rear", "right_front", "right_rear", "front_left", "front_right", "front_center"]:
             device = self.distance_sensors.get(key)
             if device:
                 raw = device.getValue()
@@ -260,7 +263,11 @@ class Pioneer3ATSensors:
         # Aggregate averages
         self.latest_distances["avg_left"] = (self.latest_distances["left_front"] + self.latest_distances["left_rear"]) / 2.0
         self.latest_distances["avg_right"] = (self.latest_distances["right_front"] + self.latest_distances["right_rear"]) / 2.0
-        self.latest_distances["min_front"] = min(self.latest_distances["front_left"], self.latest_distances["front_right"])
+        self.latest_distances["min_front"] = min(
+            self.latest_distances["front_left"],
+            self.latest_distances["front_right"],
+            self.latest_distances.get("front_center", 2.0)
+        )
 
     # =========================================================================
     # HIGH-LEVEL API EXPOSED TO OTHER MODULES
