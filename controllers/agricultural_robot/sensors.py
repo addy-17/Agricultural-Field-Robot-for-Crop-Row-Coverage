@@ -200,20 +200,21 @@ class Pioneer3ATSensors:
 
     def calibrate_raw_to_meters(self, raw_value: float) -> float:
         """
-        Calibrates raw Webots distance sensor reading to metric distance (meters).
+        Calibrates raw Webots distance sensor / sonar reading to metric distance (meters).
         
-        Calibration model:
-          In Webots standard DistanceSensor lookup tables:
-            raw = 1024 (or max) -> far range (2.0 m or open field)
-            raw = 0             -> near / in contact (0.0 m)
-          Linearly or piecewise calibrated to meters:
-            distance (m) = clamp( (raw / RAW_ADC_MAX) * SENSOR_MAX_RANGE, MIN, MAX )
+        Standard Webots DistanceSensor & Pioneer 3-AT Sonar response curve:
+          - raw = 0 (or near zero): Open field / no obstacle detected within range -> max range (2.0 m)
+          - raw = 1024: Obstacle directly in contact with sensor -> min range (0.05 m)
+          - raw = 512: Obstacle at mid-range (approx 1.0 m)
+          
+        Formula:
+          distance = max_range * (1.0 - (raw / raw_max))
         """
-        if raw_value is None or math.isnan(raw_value):
+        if raw_value is None or math.isnan(raw_value) or raw_value <= 1.0:
             return self.SENSOR_MAX_RANGE_METERS
 
         normalized = max(0.0, min(raw_value / self.RAW_ADC_MAX, 1.0))
-        dist_m = normalized * self.SENSOR_MAX_RANGE_METERS
+        dist_m = self.SENSOR_MAX_RANGE_METERS * (1.0 - normalized)
         return max(self.SENSOR_MIN_RANGE_METERS, min(dist_m, self.SENSOR_MAX_RANGE_METERS))
 
     def update(self) -> None:

@@ -90,13 +90,13 @@ def run_tests():
     print("\n[TEST 3] Distance Sensor Calibration Curve...")
     sensors = Pioneer3ATSensors()
     
-    # 0 ADC -> 0.05m (min clamp), 512 ADC -> 1.0m, 1024 ADC -> 2.0m (max)
+    # 0 ADC -> 2.0m (open field), 512 ADC -> 1.0m, 1024 ADC -> 0.05m (contact min clamp)
     d_0 = sensors.calibrate_raw_to_meters(0.0)
     d_half = sensors.calibrate_raw_to_meters(512.0)
     d_full = sensors.calibrate_raw_to_meters(1024.0)
-    assert math.isclose(d_0, 0.05, rel_tol=1e-2)
+    assert math.isclose(d_0, 2.00, rel_tol=1e-2)
     assert math.isclose(d_half, 1.00, rel_tol=1e-2)
-    assert math.isclose(d_full, 2.00, rel_tol=1e-2)
+    assert math.isclose(d_full, 0.05, rel_tol=1e-2)
     print(f"  -> RAW=0 -> {d_0:.2f}m, RAW=512 -> {d_half:.2f}m, RAW=1024 -> {d_full:.2f}m [OK]")
     passed += 1
 

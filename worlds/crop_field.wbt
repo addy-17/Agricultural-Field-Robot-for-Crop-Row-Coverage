@@ -3,7 +3,6 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/robots/adept/pioneer3/protos/Pioneer3at.proto"
-EXTERNPROTO "webots://projects/robots/adept/pioneer3/protos/Pioneer3at.proto"
 
 WorldInfo {
   info [
@@ -160,7 +159,7 @@ Solid {
 # PIONEER 3-AT ROBOT WITH SENSORS & ACTUATORS (MEMBER 2 DELIVERABLE)
 # =========================================================================
 Pioneer3at {
-  translation -7 0.11 0
+  translation -7 0.115 0
   rotation 0 1 0 0
   name "Pioneer_3_AT"
   controller "agricultural_robot"
@@ -193,8 +192,8 @@ Pioneer3at {
       rotation 0 1 0 1.5708
       name "ds_left_front"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
     # Left-Rear Distance Sensor (Points Lateral Left at +90 deg)
@@ -203,8 +202,8 @@ Pioneer3at {
       rotation 0 1 0 1.5708
       name "ds_left_rear"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
     # Right-Front Distance Sensor (Points Lateral Right at -90 deg)
@@ -213,8 +212,8 @@ Pioneer3at {
       rotation 0 1 0 -1.5708
       name "ds_right_front"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
     # Right-Rear Distance Sensor (Points Lateral Right at -90 deg)
@@ -223,28 +222,28 @@ Pioneer3at {
       rotation 0 1 0 -1.5708
       name "ds_right_rear"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
     # Front-Left Safety Distance Sensor (Points Forward-Left at +15 deg)
     DistanceSensor {
-      translation 0.25 0.18 0.10
+      translation 0.28 0.18 0.10
       rotation 0 1 0 0.26
       name "ds_front_left"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
     # Front-Right Safety Distance Sensor (Points Forward-Right at -15 deg)
     DistanceSensor {
-      translation 0.25 0.18 -0.10
+      translation 0.28 0.18 -0.10
       rotation 0 1 0 -0.26
       name "ds_front_right"
       lookupTable [
-        0 0 0
-        2 1024 0
+        0 1024 0
+        2 0 0
       ]
     }
   ]

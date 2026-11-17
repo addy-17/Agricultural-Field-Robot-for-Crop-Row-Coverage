@@ -112,7 +112,6 @@ class MasterAgriculturalRobot:
             # -----------------------------------------------------------------
             self.sensors.update()
             x, y, yaw = self.sensors.get_pose()
-            # If in NUE/Webots world with Z as lateral axis, GPS returns (x, y, z)
             z = self.sensors.latest_pose.get("z", 0.0)
 
             e_y, e_psi = self.sensors.get_row_errors()
@@ -123,7 +122,8 @@ class MasterAgriculturalRobot:
             # STEP 2: Mission Planning & State Supervision (Member 1)
             # -----------------------------------------------------------------
             turn_completed = not self.turn_generator.is_running
-            is_obstacle = (front_dist <= 0.40)
+            # Only trigger obstacle braking if inside obstacle zone after initial startup
+            is_obstacle = (front_dist <= 0.40) and (self.step_count > 60)
 
             state = self.mission_planner.update(
                 x=x,
@@ -136,10 +136,15 @@ class MasterAgriculturalRobot:
             # -----------------------------------------------------------------
             # STEP 3: Execution Control by State
             # -----------------------------------------------------------------
-            v_cmd = 0.0
+            v_cmd = 0.45
             omega_cmd = 0.0
 
-            if state == MissionState.IN_ROW_TRACKING:
+            if state == MissionState.INITIALIZE or self.step_count < 30:
+                # Startup phase: drive straight forward down the row
+                v_cmd = 0.45
+                omega_cmd = 0.0
+
+            elif state == MissionState.IN_ROW_TRACKING:
                 # Member 3: In-Row Centering Guidance
                 v_des, omega_des = self.guidance.compute(lateral_error=e_y, heading_error=e_psi, dt=self.dt)
                 # Member 3: Reactive Obstacle Safety Filter
