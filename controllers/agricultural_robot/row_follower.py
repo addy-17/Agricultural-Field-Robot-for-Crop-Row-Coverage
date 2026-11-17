@@ -54,18 +54,20 @@ class MethodAPIDRowFollower:
         Computes commanded body velocities (v, omega) using baseline PID.
         
         Args:
-            lateral_error: e_y (m), positive when closer to left row.
-            heading_error: e_psi (rad), positive when angled toward left row.
+            lateral_error: e_y (m), positive when shifted toward left wall.
+            heading_error: e_psi (rad), positive when angled toward left wall.
             dt: Time step duration (s).
             
         Returns:
             Tuple of (v_cmd, omega_cmd).
         """
-        # Steering effort to eliminate lateral error
-        omega_lat = self.pid_lateral.compute(error=-lateral_error, dt=dt)
+        # Steering effort to eliminate lateral error:
+        # e_y > 0 (shifted left) requires omega < 0 (turn right)
+        omega_lat = -self.pid_lateral.compute(error=lateral_error, dt=dt)
 
-        # Proportional alignment to eliminate heading error
-        omega_yaw = self.kp_yaw * (-heading_error)
+        # Proportional alignment to eliminate heading error:
+        # e_psi > 0 (angled left) requires omega < 0 (turn right)
+        omega_yaw = -self.kp_yaw * heading_error
 
         omega_cmd = omega_lat + omega_yaw
         omega_cmd = max(-self.max_omega, min(omega_cmd, self.max_omega))
@@ -110,6 +112,10 @@ class MethodBStanleyRowFollower:
     def compute(self, lateral_error: float, heading_error: float, dt: float) -> Tuple[float, float]:
         """
         Computes commanded body velocities (v, omega) using Stanley guidance.
+        
+        Conventions:
+          - lateral_error > 0 when shifted left -> requires delta < 0 (steer right)
+          - heading_error > 0 when angled left  -> requires delta < 0 (steer right)
         """
         # 1. Adaptive speed modulation based on tracking disturbance
         error_magnitude = abs(lateral_error) + (0.5 * abs(heading_error))
@@ -117,13 +123,13 @@ class MethodBStanleyRowFollower:
         v_cmd = max(self.v_min, min(v_cmd, self.v_nominal))
 
         # 2. Stanley cross-track correction angle
-        cross_track_term = math.atan2(self.k_e * (-lateral_error), v_cmd + self.epsilon)
+        cross_track_term = math.atan2(self.k_e * lateral_error, v_cmd + self.epsilon)
 
         # 3. Heading alignment term
-        heading_term = self.k_h * (-heading_error)
+        heading_term = self.k_h * heading_error
 
-        # 4. Equivalent steering angle delta
-        delta = heading_term + cross_track_term
+        # 4. Equivalent steering angle delta (negative turns right to eliminate positive errors)
+        delta = -(heading_term + cross_track_term)
 
         # 5. Convert steering angle to body yaw rate omega
         omega_cmd = (v_cmd / self.L) * math.tan(delta)

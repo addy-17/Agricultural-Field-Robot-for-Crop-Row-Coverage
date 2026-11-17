@@ -284,11 +284,13 @@ class Pioneer3ATSensors:
         Extracts cross-track error (lateral offset from row center) and
         heading orientation error relative to the crop rows.
         
-        Equations:
-          - Lateral Error: e_y = (d_left - d_right) / 2
-            (e_y > 0 means robot is shifted toward left row; e_y < 0 means shifted toward right)
-          - Heading Error: e_psi = atan2( (d_left_front - d_left_rear), base )
-            (e_psi > 0 means robot is angled toward the left row)
+        Coordinate Conventions (standard ENU / Pioneer body frame):
+          - Left row wall is at +Y (lateral left)
+          - Right row wall is at -Y (lateral right)
+          - e_y > 0 when robot is shifted toward the LEFT wall (d_right > d_left)
+          - e_y < 0 when robot is shifted toward the RIGHT wall (d_left > d_right)
+          - e_psi > 0 when robot heading is angled counter-clockwise toward LEFT wall
+          - e_psi < 0 when robot heading is angled clockwise toward RIGHT wall
             
         Returns:
             Tuple of (lateral_error_m, heading_error_rad)
@@ -296,12 +298,12 @@ class Pioneer3ATSensors:
         d_l = self.latest_distances["avg_left"]
         d_r = self.latest_distances["avg_right"]
 
-        # Lateral error: 0 when perfectly centered
-        lateral_error = (d_l - d_r) / 2.0
+        # Lateral error: positive when shifted left toward +Y wall (d_r > d_l)
+        lateral_error = (d_r - d_l) / 2.0
 
-        # Heading error from dual lateral sensor baseline
-        delta_l = self.latest_distances["left_front"] - self.latest_distances["left_rear"]
-        delta_r = self.latest_distances["right_rear"] - self.latest_distances["right_front"]
+        # Heading error: positive when angled toward +Y wall (front closer to left than rear)
+        delta_l = self.latest_distances["left_rear"] - self.latest_distances["left_front"]
+        delta_r = self.latest_distances["right_front"] - self.latest_distances["right_rear"]
         delta_avg = (delta_l + delta_r) / 2.0
 
         heading_error = math.atan2(delta_avg, self.SENSOR_LONGITUDINAL_BASE)
