@@ -43,11 +43,14 @@ class Pioneer3ATMotion:
     """
 
     # Physical vehicle constants (Pioneer 3-AT hardware specifications)
-    WHEEL_RADIUS: float = 0.111        # meters (111 mm)
-    TRACK_WIDTH: float = 0.400         # meters (effective distance between left & right wheels)
-    MAX_MOTOR_SPEED: float = 6.40      # rad/s (Pioneer 3-AT RotationalMotor maxVelocity)
-    DEFAULT_LINEAR_SPEED: float = 0.58 # m/s nominal cruising speed (~5.2 rad/s motor speed)
-    DEFAULT_ANGULAR_SPEED: float = 0.75 # rad/s nominal turning rate
+    # Wheel diameter 215 mm → radius 107.5 mm; Pioneer 3-AT wheel separation ~390 mm
+    WHEEL_RADIUS: float = 0.111        # meters (111 mm, matches Webots Pioneer3at.proto)
+    TRACK_WIDTH: float = 0.390         # meters (measured center-to-center, Pioneer 3-AT spec)
+    # Hard cap 6.00 rad/s — leaves 0.40 rad/s safety headroom below Webots maxVelocity=6.4
+    # This prevents the "requested velocity exceeds maxVelocity" console warnings.
+    MAX_MOTOR_SPEED: float = 6.00      # rad/s (safe limit, hardware max is 6.40)
+    DEFAULT_LINEAR_SPEED: float = 0.55 # m/s nominal cruising (≈4.95 rad/s, well within cap)
+    DEFAULT_ANGULAR_SPEED: float = 0.50 # rad/s nominal turning rate
 
     def __init__(self, robot: Optional[object] = None):
         """

@@ -73,9 +73,9 @@ class MasterAgriculturalRobot:
 
         # 4. Member 3: In-Row Guidance & Safety Bubble
         if self.use_method_b:
-            self.guidance = MethodBStanleyRowFollower(nominal_speed=0.58, min_speed=0.30)
+            self.guidance = MethodBStanleyRowFollower(nominal_speed=0.55, min_speed=0.28)
         else:
-            self.guidance = MethodAPIDRowFollower(nominal_speed=0.55)
+            self.guidance = MethodAPIDRowFollower(nominal_speed=0.52)
         self.safety = InRowObstacleSafety(stop_threshold=0.40, caution_threshold=0.80)
 
         # 5. Member 4: Headland Maneuver Generator
@@ -125,9 +125,13 @@ class MasterAgriculturalRobot:
             # Only trigger obstacle braking if inside obstacle zone after initial startup
             is_obstacle = (front_dist <= 0.40) and (self.step_count > 60)
 
+            # ENU world: GPS returns (x=East, y=North/lateral, z=Up/height).
+            # Mission planner's 'z' parameter is the LATERAL lane coordinate (y in ENU),
+            # NOT the height. Passing 'z' (height ≈ 0.11m constant) was causing the FSM
+            # to never detect lane transitions correctly.
             state = self.mission_planner.update(
                 x=x,
-                z=z,
+                z=y,          # <-- ENU FIX: lateral (North/Y) position, not height
                 is_row_end=is_row_end,
                 is_obstacle=is_obstacle,
                 turn_completed=turn_completed
@@ -136,12 +140,12 @@ class MasterAgriculturalRobot:
             # -----------------------------------------------------------------
             # STEP 3: Execution Control by State
             # -----------------------------------------------------------------
-            v_cmd = 0.58
+            v_cmd = 0.55
             omega_cmd = 0.0
 
             if state == MissionState.INITIALIZE or self.step_count < 30:
                 # Startup phase: drive straight forward down the row at nominal speed
-                v_cmd = 0.58
+                v_cmd = 0.55
                 omega_cmd = 0.0
 
             elif state == MissionState.IN_ROW_TRACKING:

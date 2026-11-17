@@ -38,10 +38,10 @@ class HeadlandTurnGenerator:
         self.accumulated_distance: float = 0.0
         self.initial_yaw: float = 0.0
 
-        # Physical turning limits (calibrated for maxVelocity <= 6.40 rad/s)
-        self.pivot_omega: float = 0.70       # rad/s for in-place rotation
-        self.traverse_speed: float = 0.45    # m/s for lateral transit
-        self.omega_speed: float = 0.40       # m/s nominal forward speed during continuous turn
+        # Physical turning limits (calibrated for maxVelocity <= 6.00 rad/s soft cap)
+        self.pivot_omega: float = 0.60       # rad/s for in-place rotation (pure spin, no v)
+        self.traverse_speed: float = 0.42    # m/s for lateral transit (straight segment)
+        self.omega_speed: float = 0.38       # m/s nominal forward speed during continuous turn
         self.min_turn_radius: float = 0.85   # meters (satisfies kinematic curvature limits)
 
     def start_turn(

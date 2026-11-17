@@ -27,12 +27,12 @@ class MethodAPIDRowFollower:
 
     def __init__(
         self,
-        nominal_speed: float = 0.58,
+        nominal_speed: float = 0.55,
         kp_lat: float = 1.35,
         ki_lat: float = 0.05,
         kd_lat: float = 0.22,
         kp_yaw: float = 0.65,
-        max_angular_vel: float = 0.75
+        max_angular_vel: float = 0.50   # keeps v+omega*halftrack < 5.80 rad/s
     ):
         self.v_nominal = float(nominal_speed)
         self.kp_yaw = float(kp_yaw)
@@ -89,12 +89,12 @@ class MethodBStanleyRowFollower:
 
     def __init__(
         self,
-        nominal_speed: float = 0.58,
-        min_speed: float = 0.30,
+        nominal_speed: float = 0.55,
+        min_speed: float = 0.28,
         stanley_gain: float = 1.70,
         heading_gain: float = 0.90,
-        wheelbase: float = 0.40,
-        max_angular_vel: float = 0.75
+        wheelbase: float = 0.39,
+        max_angular_vel: float = 0.50   # keeps v+omega*halftrack < 5.80 rad/s
     ):
         self.v_nominal = float(nominal_speed)
         self.v_min = float(min_speed)
