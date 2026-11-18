@@ -64,11 +64,6 @@ class CoverageMissionPlanner:
         self.headland_exit_ticks_required: int = 75
         self.headland_exit_ticks: int = 0
 
-        # Row entry state supervision
-        self.row_entry_ticks: int = 0
-        self.max_row_entry_ticks: int = 250   # ~8.0 s maximum entry acquisition window
-        self.is_lost: bool = False
-
         # Telemetry & Coverage Metrics
         self.distance_traversed: float = 0.0
         self.total_planned_distance: float = len(self.lanes) * self.field_length_x
@@ -103,12 +98,6 @@ class CoverageMissionPlanner:
             return self.lanes[self.current_lane_idx]
         return self.lanes[-1]
 
-    def get_next_lane(self) -> Optional[Dict[str, any]]:
-        """Returns the next navigation lane dictionary if available."""
-        if self.current_lane_idx + 1 < len(self.lanes):
-            return self.lanes[self.current_lane_idx + 1]
-        return None
-
     def get_target_turn_direction(self) -> str:
         """
         Determines whether the robot should turn LEFT or RIGHT into the next row.
@@ -134,9 +123,7 @@ class CoverageMissionPlanner:
         z: float,
         is_row_end: bool,
         is_obstacle: bool,
-        turn_completed: bool,
-        is_row_entered: bool = False,
-        yaw: float = 0.0
+        turn_completed: bool
     ) -> MissionState:
         """
         Main FSM Transition Function. Evaluates current pose and sensor flags
@@ -148,8 +135,6 @@ class CoverageMissionPlanner:
             is_row_end: Boolean flag from Member 2 sensors.
             is_obstacle: Boolean flag from Member 2 sensors.
             turn_completed: Boolean flag from Member 4 headland maneuver.
-            is_row_entered: Boolean flag indicating foliage detected inside row.
-            yaw: Current robot heading in radians.
             
         Returns:
             Current MissionState.
@@ -163,9 +148,8 @@ class CoverageMissionPlanner:
                 self.distance_traversed += step_dist
         self.last_pose = (x, z)
 
-        # Emergency obstacle handling overrides normal state only during IN_ROW_TRACKING
-        # (headland transitions and turns must not be interrupted by in-row obstacle safety)
-        if is_obstacle and self.state == MissionState.IN_ROW_TRACKING:
+        # Emergency obstacle handling overrides normal state
+        if is_obstacle and self.state not in (MissionState.OBSTACLE_AVOIDANCE, MissionState.MISSION_COMPLETE):
             self.previous_state = self.state
             self.state = MissionState.OBSTACLE_AVOIDANCE
             return self.state
@@ -173,7 +157,7 @@ class CoverageMissionPlanner:
         if self.state == MissionState.OBSTACLE_AVOIDANCE:
             if not is_obstacle:
                 # Obstacle cleared, resume previous state
-                self.state = self.previous_state if self.previous_state != MissionState.OBSTACLE_AVOIDANCE else MissionState.IN_ROW_TRACKING
+                self.state = self.previous_state
             return self.state
 
         # State Machine Transitions
@@ -185,19 +169,13 @@ class CoverageMissionPlanner:
 
         elif self.state == MissionState.IN_ROW_TRACKING:
             # Check row boundary / headland triggers
-            # Physical crop rows extend from x = -8.0m to x = +8.0m (length 16.0m).
-            # The robot must be approaching and near the headland boundary in the lane's direction.
             at_headland = False
-            near_headland = False
+            if curr_lane["direction"] > 0 and x >= self.headland_x_pos:
+                at_headland = True
+            elif curr_lane["direction"] < 0 and x <= self.headland_x_neg:
+                at_headland = True
 
-            if curr_lane["direction"] > 0:
-                at_headland = (x >= self.headland_x_pos)
-                near_headland = (x >= (self.headland_x_pos - 0.50))
-            elif curr_lane["direction"] < 0:
-                at_headland = (x <= self.headland_x_neg)
-                near_headland = (x <= (self.headland_x_neg + 0.50))
-
-            if at_headland or (is_row_end and near_headland):
+            if is_row_end or at_headland:
                 self.state = MissionState.HEADLAND_TRANSITION
 
         elif self.state == MissionState.HEADLAND_TRANSITION:
@@ -218,35 +196,11 @@ class CoverageMissionPlanner:
                 # Headland turn finished, enter the new row
                 self.completed_lanes.append(curr_lane["id"])
                 self.current_lane_idx += 1
-                self.row_entry_ticks = 0
                 self.state = MissionState.ROW_ENTRY
 
         elif self.state == MissionState.ROW_ENTRY:
-            # Meaningful ROW_ENTRY: verify robot position and alignment with next row
-            self.row_entry_ticks += 1
-            curr_lane = self.get_current_lane()
-            target_y = curr_lane["z_center"]
-            lane_dir = curr_lane["direction"]
-            target_yaw = 0.0 if lane_dir > 0 else math.pi
-
-            # Longitudinal progress past the headland threshold into the crop row (-8.0 to +8.0)
-            past_boundary = False
-            if lane_dir > 0 and x >= -7.80:
-                past_boundary = True
-            elif lane_dir < 0 and x <= 7.80:
-                past_boundary = True
-
-            lat_err = abs(z - target_y)
-            heading_err = abs(math.atan2(math.sin(yaw - target_yaw), math.cos(yaw - target_yaw)))
-            aligned = (lat_err <= 0.35) and (heading_err <= 0.40) and past_boundary
-
-            # Transition to in-row tracking ONLY once robot is aligned and has entered correct region
-            if (aligned and self.row_entry_ticks >= 10) or (is_row_entered and past_boundary and lat_err <= 0.35 and heading_err <= 0.40):
-                self.state = MissionState.IN_ROW_TRACKING
-            elif self.row_entry_ticks >= self.max_row_entry_ticks:
-                # Do not transition unconditionally to IN_ROW_TRACKING outside the lane.
-                # Flag failure so safety recovery halts execution.
-                self.is_lost = True
+            # Once inside new row, transition back to in-row guidance
+            self.state = MissionState.IN_ROW_TRACKING
 
         elif self.state == MissionState.MISSION_COMPLETE:
             pass
